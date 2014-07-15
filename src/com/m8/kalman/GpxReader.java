@@ -61,11 +61,8 @@ public class GpxReader {
 					else if(trkptChild.getLocalName().equals("hdop")){
 						hm.put("hdop", trkptChild.getText());
 					}
-					else if(trkptChild.getLocalName().equals("hdop")){
+					else if(trkptChild.getLocalName().equals("vdop")){
 						hm.put("vdop", trkptChild.getText());
-					}
-					else if(trkptChild.getLocalName().equals("pdop")){
-						hm.put("pdop", trkptChild.getText());
 					}
 					else if(trkptChild.getLocalName().equals("pdop")){
 						hm.put("pdop", trkptChild.getText());
@@ -83,6 +80,11 @@ public class GpxReader {
 
 	}
 	public static void printElement(HashMap hm){
-		System.out.println(hm.get("speed"));
+		System.out.println("lat : "+hm.get("lat"));
+		System.out.println("lon : "+hm.get("lon"));
+		System.out.println("speed : "+hm.get("speed"));
+		System.out.println("vdop : "+hm.get("vdop"));
+		System.out.println("pdop : "+hm.get("pdop"));
+		System.out.println();
 	}
 }
