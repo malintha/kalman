@@ -3,8 +3,10 @@ package com.m8.kalman;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
+
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.impl.builder.StAXOMBuilder;
@@ -44,8 +46,8 @@ public class GpxReader {
 			while(itr.hasNext()){
 				OMElement elemtrkpt = (OMElement) itr.next();
 			//	System.out.println(elemtrkpt);
-				String lat = elemtrkpt.getAttributeValue(new QName("lat"));
-				String lon = elemtrkpt.getAttributeValue(new QName("lon"));
+				double lat = Double.parseDouble(elemtrkpt.getAttributeValue(new QName("lat")));
+				double lon = Double.parseDouble(elemtrkpt.getAttributeValue(new QName("lon")));
 				//System.out.println(lat+" , "+lon);			
 				hm.put("lat", lat);
 				hm.put("lon", lon);
@@ -56,17 +58,21 @@ public class GpxReader {
 					OMElement trkptChild = (OMElement) trkptItr.next();
 					//System.out.println(trkptChild.getLocalName());
 					if(trkptChild.getLocalName().equals("speed")){
-						hm.put("speed", trkptChild.getText());
+						hm.put("speed", Double.parseDouble(trkptChild.getText()));
 					}
 					else if(trkptChild.getLocalName().equals("hdop")){
-						hm.put("hdop", trkptChild.getText());
+						hm.put("hdop", Double.parseDouble(trkptChild.getText()));
 					}
 					else if(trkptChild.getLocalName().equals("vdop")){
-						hm.put("vdop", trkptChild.getText());
+						hm.put("vdop", Double.parseDouble(trkptChild.getText()));
 					}
 					else if(trkptChild.getLocalName().equals("pdop")){
-						hm.put("pdop", trkptChild.getText());
+						hm.put("pdop", Double.parseDouble(trkptChild.getText()));
 					}
+					else if(trkptChild.getLocalName().equals("course")){
+						hm.put("course", Double.parseDouble(trkptChild.getText()));
+					}
+					
 				}
 				Thread.sleep(1000);
 				printElement(hm);
@@ -77,14 +83,28 @@ public class GpxReader {
 			System.out.println(e.getLocalizedMessage());
 		}
 		
-
 	}
+	private static boolean kalmanInitialized = false;
+	
 	public static void printElement(HashMap hm){
-		System.out.println("lat : "+hm.get("lat"));
-		System.out.println("lon : "+hm.get("lon"));
-		System.out.println("speed : "+hm.get("speed"));
-		System.out.println("vdop : "+hm.get("vdop"));
-		System.out.println("pdop : "+hm.get("pdop"));
-		System.out.println();
+		
+		double lat =  (Double)hm.get("lat");
+		double lon = (Double)hm.get("lon");
+		double course = (Double)hm.get("course");
+		double velocity = (Double)hm.get("speed");
+		double Vx =(Double)hm.get("vdop"); 
+		double Vy = (Double)hm.get("hdop");
+		
+		KalmanF.setgpshm(lat, lon, course, velocity, Vx, Vy);
+		
+		if(kalmanInitialized == false){
+			System.out.println("kalmanInitialized "+kalmanInitialized);
+			KalmanF.doKalman(lat, lon, course, velocity);
+			kalmanInitialized = true;
+		}
+		
+		KalmanF.doCorrect();		
+		System.out.println(KalmanF.getEstimateVector());
+		
 	}
 }

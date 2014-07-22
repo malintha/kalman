@@ -29,16 +29,17 @@ public class KalmanF {
 	
 	public static void main(String[] args){
 		doKalman(6.87308728, 79.87337101, 310.1, 4.25);
-		setgpshm(6.87595897, 79.86998918, 337.8, 12.093387, 11, 8);
+		setgpshm(6.87595897, 79.86998918, 337.8, 12.093387, 1.4, 2.1);
+		doCorrect();
+		setgpshm(6.8787757, 79.86952878, 0.0, 12.2602, 1.1, 1.8);
 		doCorrect();
 	}
-	
 	
 	
 	public static void setgpshm(double lat, double lon,double course,double velocity, double Vx, double Vy){
 		double dX,dY;
 		double[] dxy;
-		
+
 		rX = xFromLonLatH(lat, lon, height, a, b);
 		rY = yFromLonLatH(lat, lon, height, a, b);
 		rZ = zFromLatH(lat, lon, a, b);
@@ -52,7 +53,7 @@ public class KalmanF {
 		gpshm.put("Vx", Vx);
 		gpshm.put("Vy", Vy);
 		
-		System.out.println("rX:"+rX+", dX:"+dxy[0]+", rY:"+rY+", dY:"+dxy[1]);
+		//System.out.println("rX:"+rX+", dX:"+dxy[0]+", rY:"+rY+", dY:"+dxy[1]);
 	}
 	
 
@@ -128,7 +129,7 @@ private static KalmanFilter filter;
 
 
 public static void doKalman(double lat, double lon, double course, double velocity){
-	
+	//System.out.println("called");
 	double initX = xFromLonLatH(lat, lon, height, a, b);
 	double initY = yFromLonLatH(lat, lon, height, a, b);
 	double[] initVelocity = dXY(course, velocity);
@@ -176,8 +177,6 @@ public static void doKalman(double lat, double lon, double course, double veloci
 	 * 
 	 */
 	
-	double Vx;
-	double Vy;
 	
 	double dt = 77d;	
 	A = new Array2DRowRealMatrix(new double[][] { 	{ 1d, dt, 0d, 0d }, 
@@ -187,7 +186,7 @@ public static void doKalman(double lat, double lon, double course, double veloci
 												});
 	//initialize with initial coordinates
 	x = new ArrayRealVector(new double[] { initX, initVelocity[0], initY, initVelocity[1] });
-	System.out.println("init : "+x);
+	//System.out.println("init : "+x);
 	B = null;
 	Q = new Array2DRowRealMatrix(new double[][]{	{0, 0, 0, 0},
 													{0, 0, 0, 0},
@@ -195,124 +194,66 @@ public static void doKalman(double lat, double lon, double course, double veloci
 													{0, 0, 0, 0}
 												});
 	
-	P0 = new Array2DRowRealMatrix(new double[][] {	{ 1, 1, 1, 1 }, 
-													{ 1, 1, 1, 1 },
-													{ 1, 1, 1, 1 },
-													{ 1, 1, 1, 1 }
-												});
 
-	double[] generic_error = {10d,};
-	R = new Array2DRowRealMatrix(generic_error);
+	R = new Array2DRowRealMatrix(new double[][] { 	{ 1d, 0d, 0d, 0d },
+													{ 0d, 1d, 0d, 0d },
+													{ 0d, 0d, 1d, 0d },
+													{ 0d, 0d, 0d, 1d }
+													});
 	
-	H = new Array2DRowRealMatrix(new double[][] { 	{ 1d, 0d, 1d, 0d } });
-	m_noise = new ArrayRealVector(1);
+	H = new Array2DRowRealMatrix(new double[][] { 	{ 1d, 0d, 0d, 0d },
+													{ 0d, 1d, 0d, 0d },
+													{ 0d, 0d, 1d, 0d },
+													{ 0d, 0d, 0d, 1d }
+													});
+	m_noise = new ArrayRealVector(4);
 	
-	pm = new DefaultProcessModel(A, B, Q, x, P0);
+	pm = new DefaultProcessModel(A, B, Q, x, null);
 	mm = new DefaultMeasurementModel(H, R);
 	filter = new KalmanFilter(pm, mm);
 }
 
-
-//public static void main(String args[]){
-//	// discrete time interval
-//	double dt = 1d;
-//	// position measurement noise (meter)
-//	double measurementNoise = 10d;
-//	// acceleration noise (meter/sec^2)
-//	double accelNoise = 0;
-//
-//	// A = [ 1 dt ]
-//	//     [ 0  1 ]
-//	RealMatrix A = new Array2DRowRealMatrix(new double[][] { { 1, dt }, { 0, 1 } });
-//	// B = [ dt^2/2 ]
-//	//	   [ dt     ]
-//	RealMatrix B = new Array2DRowRealMatrix(new double[][] { { Math.pow(dt, 2d) / 2d }, { dt } });
-//	// H = [ 1 0 ]
-//	RealMatrix H = new Array2DRowRealMatrix(new double[][] { { 1d, 0d } });
-//	// x = [ 0; 0 ]
-//	RealVector x = new ArrayRealVector(new double[] { 0, 0 });
-//
-//	RealMatrix tmp = new Array2DRowRealMatrix(new double[][] {
-//	    { Math.pow(dt, 4d) / 4d, Math.pow(dt, 3d) / 2d },
-//	    { Math.pow(dt, 3d) / 2d, Math.pow(dt, 2d) } });
-//	// Q = 		[ dt^4/4 dt^3/2 ]
-////	     	[ dt^3/2 dt^2   ]
-//	RealMatrix Q = tmp.scalarMultiply(Math.pow(accelNoise, 2));
-//	// P0 = 	[ 1 1 ]
-////	      	[ 1 1 ]
-//	RealMatrix P0 = new Array2DRowRealMatrix(new double[][] { { 1, 1 }, { 1, 1 } });
-//	// R = [ measurementNoise^2 ]
-//	RealMatrix R = new Array2DRowRealMatrix(new double[] { Math.pow(measurementNoise, 2) });
-//
-//	// constant control input, increase velocity by 0.1 m/s per cycle
-//	//RealVector u = new ArrayRealVector(new double[] { 0.1d });
-//
-//	ProcessModel pm = new DefaultProcessModel(A, B, Q, x, P0);
-//	MeasurementModel mm = new DefaultMeasurementModel(H, R);
-//	KalmanFilter filter = new KalmanFilter(pm, mm);
-//
-//	RandomGenerator rand = new JDKRandomGenerator();
-//
-//	RealVector tmpPNoise = new ArrayRealVector(new double[] { Math.pow(dt, 2d) / 2d, dt });
-//	RealVector mNoise = new ArrayRealVector(1);
-//
-//	// iterate 10 steps
-//	for (int i = 0; i < 10; i++) {
-//		// filter.predict(u);
-//	    //System.out.println("Predicted value at timestamp "+i+" : "+x);
-//	    // simulate the process
-//	    RealVector pNoise = tmpPNoise.mapMultiply(rand.nextGaussian());
-//
-//	    // x = A * x + B * u + pNoise
-//	    x = A.operate(x).add(pNoise);
-//
-//	    // simulate the measurement
-//	    mNoise.setEntry(0, measurementNoise * rand.nextGaussian());
-//
-//	    // z = H * x + m_noise
-//	    RealVector z = H.operate(x).add(mNoise);
-//	    
-//	    filter.correct(z);
-//	    System.out.println("Corrected value at timestamp "+i+" : "+x);
-//	    double position = filter.getStateEstimation()[0];
-//	    double velocity = filter.getStateEstimation()[1];
-//	}
-//}
-	
 	public static void doCorrect(){
 		//every changing matrix should be set in here
 
-		//R.setColumn(0, new double[] {(Double) gpshm.get("Vx"),(Double) gpshm.get("Vy")});
-
 		//xt = A*x(t-1)
 		//this should help to predict the next state
-		x = A.operate(x);
-//		System.out.println("after A.X(t-1)"+x);
+
+		//x = A.operate(x);
+		System.out.println("a : "+filter.getStateEstimationVector());
 		//now predict
 		filter.predict();
-		System.out.println("p : "+x);
-		
-		
-		//set new values
-//		x.setEntry(0, (Double) gpshm.get("rX"));
-//		x.setEntry(1, (Double) gpshm.get("dX"));
-//		x.setEntry(2, (Double) gpshm.get("rY"));
-//		x.setEntry(3, (Double) gpshm.get("dY"));
-		
-		//System.out.println("1 : "+x);
+		System.out.println("p : "+filter.getStateEstimationVector());
+
 		double[] m_noise_array = {(Double) gpshm.get("Vx"),(Double) gpshm.get("Vy")};
+		
 		m_noise.setEntry(0, m_noise_array[0]);
-		//m_noise.setEntry(1, m_noise_array[1]);
+		m_noise.setEntry(1, Math.pow(m_noise_array[0], 2));
+		m_noise.setEntry(2, m_noise_array[1]);
+		m_noise.setEntry(3, Math.pow(m_noise_array[0], 2));
 		
 		//z = H*x + m_noise
-		RealVector z = H.operate(x).add(m_noise);
-		System.out.println(z+"\n"+x);
-		//now correct
+		//RealVector z = H.operate(x).add(m_noise);
+		RealVector z = new ArrayRealVector(4);
+		//get next estimates and add with error
+		z.setEntry(0, (Double) gpshm.get("rX"));
+		z.setEntry(1, (Double) gpshm.get("dX"));
+		z.setEntry(2, (Double) gpshm.get("rY"));
+		z.setEntry(3, (Double) gpshm.get("dY"));
 		
-		//filter.correct(z);
-		//System.out.println("c : "+x);
+		z = z.add(m_noise);
+		System.out.println("z : "+z);
+		//now correct
+		filter.correct(z);
+		
+		System.out.println("c : "+filter.getStateEstimationVector());
+		System.out.println();
+		}
+	
+	public static RealVector getEstimateVector(){
+		return filter.getStateEstimationVector();
+	}
 	}
 	
-}
 
 
