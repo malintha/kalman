@@ -15,6 +15,11 @@ import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import com.henson.midp.Float11;
+/**
+ * 
+ * @author malintha
+ *
+ */
 
 public class KalmanF {
 	private static final double PI_DIV_180 = 0.017453292519943295769236907684886;
@@ -188,10 +193,10 @@ public static void doKalman(double lat, double lon, double course, double veloci
 	x = new ArrayRealVector(new double[] { initX, initVelocity[0], initY, initVelocity[1] });
 	//System.out.println("init : "+x);
 	B = null;
-	Q = new Array2DRowRealMatrix(new double[][]{	{0, 0, 0, 0},
-													{0, 0, 0, 0},
-													{0, 0, 0, 0},
-													{0, 0, 0, 0}
+	Q = new Array2DRowRealMatrix(new double[][]{	{0d, 0d, 0d, 0d},
+													{0d, 0d, 0d, 0d},
+													{0d, 0d, 0d, 0d},
+													{0d, 0d, 0d, 0d}
 												});
 	
 
