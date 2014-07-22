@@ -191,18 +191,19 @@ public static void doKalman(double lat, double lon, double course, double veloci
 												});
 	//initialize with initial coordinates
 	x = new ArrayRealVector(new double[] { initX, initVelocity[0], initY, initVelocity[1] });
-	//System.out.println("init : "+x);
+	System.out.println("init : "+x);
 	B = null;
-	Q = new Array2DRowRealMatrix(new double[][]{	{0d, 0d, 0d, 0d},
-													{0d, 0d, 0d, 0d},
-													{0d, 0d, 0d, 0d},
-													{0d, 0d, 0d, 0d}
+	
+	Q = new Array2DRowRealMatrix(new double[][]{	{1d, 0d, 0d, 0d},
+													{0d, 1d, 0d, 0d},
+													{0d, 0d, 1d, 0d},
+													{0d, 0d, 0d, 1d}
 												});
 	
 
-	R = new Array2DRowRealMatrix(new double[][] { 	{ 1d, 0d, 0d, 0d },
+	R = new Array2DRowRealMatrix(new double[][] { 	{ 3d, 0d, 0d, 0d },
 													{ 0d, 1d, 0d, 0d },
-													{ 0d, 0d, 1d, 0d },
+													{ 0d, 0d, 3d, 0d },
 													{ 0d, 0d, 0d, 1d }
 													});
 	
@@ -233,9 +234,9 @@ public static void doKalman(double lat, double lon, double course, double veloci
 		double[] m_noise_array = {(Double) gpshm.get("Vx"),(Double) gpshm.get("Vy")};
 		
 		m_noise.setEntry(0, m_noise_array[0]);
-		m_noise.setEntry(1, Math.pow(m_noise_array[0], 2));
+		m_noise.setEntry(1, Math.pow(m_noise_array[0], 0.5));
 		m_noise.setEntry(2, m_noise_array[1]);
-		m_noise.setEntry(3, Math.pow(m_noise_array[0], 2));
+		m_noise.setEntry(3, Math.pow(m_noise_array[0], 0.5));
 		
 		//z = H*x + m_noise
 		//RealVector z = H.operate(x).add(m_noise);
@@ -245,9 +246,9 @@ public static void doKalman(double lat, double lon, double course, double veloci
 		z.setEntry(1, (Double) gpshm.get("dX"));
 		z.setEntry(2, (Double) gpshm.get("rY"));
 		z.setEntry(3, (Double) gpshm.get("dY"));
-		
-		z = z.add(m_noise);
 		System.out.println("z : "+z);
+		z = z.add(m_noise);
+		System.out.println("z' : "+z);
 		//now correct
 		filter.correct(z);
 		
