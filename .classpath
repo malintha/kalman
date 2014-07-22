@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="/home/malintha/Desktop/Kalman_project/commons-math3-3.3/commons-math3-3.3-javadoc.jar"/>
 	<classpathentry kind="lib" path="/home/malintha/Desktop/Kalman_project/axiom.jar"/>
 	<classpathentry kind="lib" path="/home/malintha/Desktop/Kalman_project/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="/home/malintha/Desktop/Kalman_project/gvSIGMiniCompat.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
