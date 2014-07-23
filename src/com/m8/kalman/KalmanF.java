@@ -220,9 +220,14 @@ public static void doKalman(double lat, double lon, double course, double veloci
 													{ 0d, 0d, 1d, 0d },
 													{ 0d, 0d, 0d, 1d }
 													});
+	
+	P0 = new Array2DRowRealMatrix(new double[][] {{1d, 0d, 0d, 0d},
+													{0d, 1d, 0d, 0d},
+													{0d, 0d, 1d, 0d},
+													{0d, 0d, 0d, 1d}});
 	m_noise = new ArrayRealVector(4);
 	
-	pm = new DefaultProcessModel(A, B, Q, x, null);
+	pm = new DefaultProcessModel(A, B, Q, x, P0);
 	mm = new DefaultMeasurementModel(H, R);
 	filter = new KalmanFilter(pm, mm);
 }
