@@ -104,7 +104,8 @@ public class GpxReader {
 		}
 		
 		KalmanF.doCorrect();		
-		System.out.println(KalmanF.getEstimateVector());
+		double[] tempArray = KalmanF.getEstimation();
+		System.out.println(tempArray[0]+" , "+tempArray[1]);
 		
 	}
 }

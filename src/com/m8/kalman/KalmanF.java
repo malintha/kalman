@@ -38,7 +38,7 @@ import com.henson.midp.Float11;
  * 
  * Q	process noise can be huge and can't assume to be distributed normally. so omit it.
  * 
- * dt 	period between 2 measurements. lets say 2 seconds.
+ * dt 	period between 2 measurements. 10 seconds.
  * 
  * x	initial state. should be initialized with the initial coordinates.	[XfromLatLon]
  * 																			[dX			]
@@ -77,14 +77,14 @@ public class KalmanF {
 	private static double rZ;
 	
 	public static void main(String[] args){
-		doKalman(6.87308728, 79.87337101, 310.1, 4.25);
+		doKalman(6.881243, 79.89043, 133.00, 20.000);
 		
-		setgpshm(6.87595897, 79.86998918, 337.8, 12.093387, 1.4, 2.1);
+		setgpshm(6.880756, 79.89090, 139.00, 29.000, 1.4, 2.1);
 		doCorrect();
 		System.out.println(getEstimation()[0]+", "+getEstimation()[1]);
-		System.out.println("a");
+
 		
-		setgpshm(6.8787757, 79.86952878, 0.0, 12.2602, 1.1, 1.8);
+		setgpshm(6.880080, 79.89117, 179.00, 24.000, 1.1, 1.8);
 		doCorrect();
 		System.out.println(getEstimation()[0]+", "+getEstimation()[1]);
 		
@@ -191,7 +191,7 @@ public static void doKalman(double lat, double lon, double course, double veloci
 	double[] initVelocity = dXY(course, velocity);
 
 	
-	double dt = 77d;	
+	double dt = 10d;	
 	A = new Array2DRowRealMatrix(new double[][] { 	{ 1d, dt, 0d, 0d }, 
 													{ 0d, 1d, 0d, 0d }, 
 													{ 0d, 0d, 1d, dt },
@@ -199,7 +199,7 @@ public static void doKalman(double lat, double lon, double course, double veloci
 												});
 	//initialize with initial coordinates
 	x = new ArrayRealVector(new double[] { initX, initVelocity[0], initY, initVelocity[1] });
-	System.out.println("init : "+x);
+	//System.out.println("init : "+x);
 	B = null;
 	
 	Q = new Array2DRowRealMatrix(new double[][]{	{1d, 0d, 0d, 0d},
@@ -239,10 +239,10 @@ public static void doKalman(double lat, double lon, double course, double veloci
 		//this should help to predict the next state
 
 		//x = A.operate(x);
-		System.out.println("a : "+filter.getStateEstimationVector());
+		//System.out.println("a : "+filter.getStateEstimationVector());
 		//now predict
 		filter.predict();
-		System.out.println("p : "+filter.getStateEstimationVector());
+		//System.out.println("p : "+filter.getStateEstimationVector());
 
 		double[] m_noise_array = {(Double) gpshm.get("Vx"),(Double) gpshm.get("Vy")};
 		
@@ -265,7 +265,7 @@ public static void doKalman(double lat, double lon, double course, double veloci
 		//now correct
 		filter.correct(z);
 		
-		System.out.println("c : "+filter.getStateEstimationVector());
+		//System.out.println("c : "+filter.getStateEstimationVector());
 		}
 	
 	public static RealVector getEstimateVector(){
