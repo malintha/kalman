@@ -7,6 +7,7 @@ import org.apache.commons.math3.filter.DefaultProcessModel;
 import org.apache.commons.math3.filter.KalmanFilter;
 import org.apache.commons.math3.filter.MeasurementModel;
 import org.apache.commons.math3.filter.ProcessModel;
+import org.apache.commons.math3.genetics.Fitness;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -15,12 +16,55 @@ import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
 import com.henson.midp.Float11;
+
 /**
  * 
  * @author malintha
  *
  */
 
+/**
+ * We are not using any control input. hence no B and U
+ * 
+ * s	state matrix 	[rX		]
+ * 						[d(rX)	]
+ * 						[rY		]
+ * 						[d(rY)	]
+ * 	
+ * A	state transition matrix [1  dt  0  0]
+ * 								[0  1   0  0]
+ * 								[0  0   1 dt]
+ * 								[0  0   0  1]
+ * 
+ * Q	process noise can be huge and can't assume to be distributed normally. so omit it.
+ * 
+ * dt 	period between 2 measurements. lets say 2 seconds.
+ * 
+ * x	initial state. should be initialized with the initial coordinates.	[XfromLatLon]
+ * 																			[dX			]
+ * 																			[YfromLatLon]
+ * 																			[dY			]
+ * H 	transformation matrix for x to z	[1 0 0 0]
+ * 											[0 0 1 0]
+ * 
+ * R	measurement noise	[X] //a generic measurement error 10m
+ * 							[Y]
+ * 
+ * m_noise  measurement noise which is assumed to be normally distributed around R
+ * 
+ * 
+ * z	Resulting measurement matrix	[X]
+ * 										[Y]
+ * 
+ * Vx	measurement error X
+ * Vy	measurement error Y
+ * 
+ * P0	initial error covariance	[1 1 1 1]
+ * 									[1 1 1 1]
+ * 									[1 1 1 1]
+ * 									[1 1 1 1]
+ * 
+ */
 public class KalmanF {
 	private static final double PI_DIV_180 = 0.017453292519943295769236907684886;
 	public static final double DEGREES_PER_RADIAN = 57.295779513082320876798154814105;
@@ -34,10 +78,16 @@ public class KalmanF {
 	
 	public static void main(String[] args){
 		doKalman(6.87308728, 79.87337101, 310.1, 4.25);
+		
 		setgpshm(6.87595897, 79.86998918, 337.8, 12.093387, 1.4, 2.1);
 		doCorrect();
+		System.out.println(getEstimation()[0]+", "+getEstimation()[1]);
+		System.out.println("a");
+		
 		setgpshm(6.8787757, 79.86952878, 0.0, 12.2602, 1.1, 1.8);
 		doCorrect();
+		System.out.println(getEstimation()[0]+", "+getEstimation()[1]);
+		
 	}
 	
 	
@@ -53,6 +103,7 @@ public class KalmanF {
 		
 		gpshm.put("rX", rX);
 		gpshm.put("rY", rY);
+		gpshm.put("rZ", rZ);
 		gpshm.put("dX", dxy[0]);
 		gpshm.put("dY", dxy[1]);
 		gpshm.put("Vx", Vx);
@@ -134,54 +185,11 @@ private static KalmanFilter filter;
 
 
 public static void doKalman(double lat, double lon, double course, double velocity){
-	//System.out.println("called");
+	System.out.println("i : "+lat+" , "+lon);
 	double initX = xFromLonLatH(lat, lon, height, a, b);
 	double initY = yFromLonLatH(lat, lon, height, a, b);
 	double[] initVelocity = dXY(course, velocity);
-	
-	/**
-	 * We are not using any control input. hence no B and U
-	 * 
-	 * s	state matrix 	[rX		]
-	 * 						[d(rX)	]
-	 * 						[rY		]
-	 * 						[d(rY)	]
-	 * 	
-	 * A	state transition matrix [1  dt  0  0]
-	 * 								[0  1   0  0]
-	 * 								[0  0   1 dt]
-	 * 								[0  0   0  1]
-	 * 
-	 * Q	process noise can be huge and can't assume to be distributed normally. so omit it.
-	 * 
-	 * dt 	period between 2 measurements. lets say 2 seconds.
-	 * 
-	 * x	initial state. should be initialized with the initial coordinates.	[XfromLatLon]
-	 * 																			[dX			]
-	 * 																			[YfromLatLon]
-	 * 																			[dY			]
-	 * H 	transformation matrix for x to z	[1 0 0 0]
-	 * 											[0 0 1 0]
-	 * 
-	 * R	measurement noise	[X] //a generic measurement error 10m
-	 * 							[Y]
-	 * 
-	 * m_noise  measurement noise which is assumed to be normally distributed around R
-	 * 
-	 * 
-	 * z	Resulting measurement matrix	[X]
-	 * 										[Y]
-	 * 
-	 * Vx	measurement error X
-	 * Vy	measurement error Y
-	 * 
-	 * P0	initial error covariance	[1 1 1 1]
-	 * 									[1 1 1 1]
-	 * 									[1 1 1 1]
-	 * 									[1 1 1 1]
-	 * 
-	 */
-	
+
 	
 	double dt = 77d;	
 	A = new Array2DRowRealMatrix(new double[][] { 	{ 1d, dt, 0d, 0d }, 
@@ -246,20 +254,31 @@ public static void doKalman(double lat, double lon, double course, double veloci
 		z.setEntry(1, (Double) gpshm.get("dX"));
 		z.setEntry(2, (Double) gpshm.get("rY"));
 		z.setEntry(3, (Double) gpshm.get("dY"));
-		System.out.println("z : "+z);
+		//System.out.println("z : "+z);
 		z = z.add(m_noise);
-		System.out.println("z' : "+z);
+		//System.out.println("z' : "+z);
 		//now correct
 		filter.correct(z);
 		
 		System.out.println("c : "+filter.getStateEstimationVector());
-		System.out.println();
 		}
 	
 	public static RealVector getEstimateVector(){
 		return filter.getStateEstimationVector();
 	}
-	}
 	
+	public static double[] getEstimation(){
+		double tempRx, tempRy, tempRz;
+		double[] tempEstimation = filter.getStateEstimation();
+		tempRx = tempEstimation[0];
+		tempRy = tempEstimation[2];
+		tempRz = (Double) gpshm.get("rZ");
+		
+		double lat = latFromXYZ(tempRx, tempRy, tempRz, a, b);
+		double lon = lonFromXYZ(tempRx, tempRy);
 
 
+		return new double[] {lat, lon};
+	}
+
+}
