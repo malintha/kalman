@@ -4,9 +4,10 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
 
-import javax.sound.sampled.Line;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+
 
 /***
  * 
@@ -31,6 +32,15 @@ public class MatrixSetter {
 	private static int Matcounter = 0;
 	private static int Linecounter = 0;
 	
+	private static RealVector x;
+	private static RealMatrix B;
+	private static RealMatrix Q;
+	private static RealMatrix P0;
+	private static RealMatrix R;
+	private static RealMatrix H;
+	private static RealMatrix A;
+	
+	
 	public static void main(String[] args) {
 		try {
 			BufferedReader fbr = new BufferedReader(new FileReader(FILE_PATH));
@@ -46,7 +56,7 @@ public class MatrixSetter {
 				}
 				
 				else{
-					putLineInMatrix((Matcounter+1), Linecounter, line);
+					initializeMatrices((Matcounter+1), Linecounter, line);
 				}
 				line = fbr.readLine();
 			}
@@ -60,16 +70,57 @@ public class MatrixSetter {
 
 	}
 	
-	public static void putLineInMatrix(int matrixNumber, int rowNum, String line){
+	/**
+	 * this calls per each line with data
+	 * 
+	 * @param matrixNumber 		to which matrix the data comes
+	 * @param rowNum 			to which row the double array needs to be set to
+	 * @param line				what is current row number
+	 */
+	public static void initializeMatrices(int matrixNumber, int rowNum, String line){
 		if(line.equals("null")){
 			System.out.println("initialized with null");
+			//get matrix number and initialize with null
 		}
 		else {
 		double[] t = parseLine(line);
-		for(double d : t)
-			System.out.print(d+" ");
-		System.out.println();
+		doInitializeMatrices(matrixNumber, rowNum, t);
 		}
+	}
+	
+	public static void doInitializeMatrices(int matrixNumber, int rowNum, double[] t) {
+//		got the double array and put it in the matrix
+		
+		switch (matrixNumber) {
+		case 1:
+			//dt is a double value
+			break;
+		case 2:
+			//x, just initialize with 0 as length of t
+			break;
+		case 3:
+			//A, t.length^2
+			//set column double array
+			break;
+		case 4:
+			//B, 
+		
+		case 5:
+			//Q
+			break;
+		case 6:
+			//R
+			break;
+		case 7:
+			//H
+			break;
+		case 8:
+			//P0
+			break;
+		default :
+			//no other cases
+			break;
+	}
 	}
 	
 	public static double[] parseLine(String line) {
