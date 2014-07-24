@@ -1,3 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<inputEventAdaptor name="knnect" statistics="enable" trace="enable"
-  type="file" xmlns="http://wso2.org/carbon/eventadaptormanager"/>

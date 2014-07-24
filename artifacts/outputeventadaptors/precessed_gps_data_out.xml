@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<outputEventAdaptor name="precessed_gps_data_out" statistics="enable"
-  trace="enable" type="http" xmlns="http://wso2.org/carbon/eventadaptormanager">
-  <property name="http.proxy.host">127.0.0.1</property>
-  <property name="http.proxy.port">3000</property>
-</outputEventAdaptor>
