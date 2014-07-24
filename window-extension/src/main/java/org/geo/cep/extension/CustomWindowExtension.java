@@ -119,14 +119,14 @@ public class CustomWindowExtension extends WindowProcessor {
         noValue = ((IntConstant) expressions[1]).getValue();
         uniqueWindow = new LinkedHashMap<Object, InEvent>();
         variablePosition = abstractDefinition.getAttributePosition(variable);
-        System.out.println("DEBUG:***Initializing custom window******************************************************************\n\n\n\n");
+        System.out.println("DEBUG:***Initializing custom window*********************************************************");
         System.out.println("DEBUG:***Variable = "+variable+"noValue = "+noValue+"uniqueWindow = "+uniqueWindow.toString());
     }
 
     private void doProcessing(InEvent event) {
         event.getData(variablePosition);
 
-        log.info(event);
+        log.info("###Event###"+event);
         Object eventKey = event.getData(variablePosition);
         if (uniqueWindow.containsKey(eventKey)) {
             InEvent firstEvent = uniqueWindow.remove(eventKey);
