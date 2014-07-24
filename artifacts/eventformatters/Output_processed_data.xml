@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eventFormatter name="Output_processed_data" statistics="enable"
+  trace="enable" xmlns="http://wso2.org/carbon/eventformatter">
+  <from streamName="GPS_data_output_stream" version="1.0.0"/>
+  <mapping customMapping="enable" type="json">
+    <inline>{
+  "latitude": "{{lat}}",
+  "longitude": "{{lon}}",
+  "speed": "{{speed}}",
+  "pdop": "{{pdop}}",
+  "vdop": "{{vdop}}",
+  "hdop": "{{hdop}}",
+  "POut": "{{processed_output}}"
+}</inline>
+  </mapping>
+  <to eventAdaptorName="precessed_gps_data_out" eventAdaptorType="http">
+    <property name="http.username"/>
+    <property name="http.password"/>
+    <property name="http.headers"/>
+    <property name="http.url">http://localhost:3000/gps_service</property>
+  </to>
+</eventFormatter>
