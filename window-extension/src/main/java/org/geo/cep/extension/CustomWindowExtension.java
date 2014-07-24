@@ -25,9 +25,7 @@ import org.wso2.siddhi.core.query.processor.window.WindowProcessor;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.Variable;
-import org.wso2.siddhi.query.api.definition.StreamDefinition;
 import org.wso2.siddhi.query.api.expression.constant.IntConstant;
-import org.wso2.siddhi.query.api.expression.Type;
 import org.wso2.siddhi.query.api.extension.annotation.SiddhiExtension;
 
 import java.util.Iterator;
