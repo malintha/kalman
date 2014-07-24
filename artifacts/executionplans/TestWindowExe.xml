@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<executionPlan name="TestWindowExe" statistics="enable" trace="enable" xmlns="http://wso2.org/carbon/eventprocessor">
+  <description/>
+  <siddhiConfiguration>
+    <property name="siddhi.persistence.snapshot.time.interval.minutes">0</property>
+    <property name="siddhi.enable.distributed.processing">false</property>
+  </siddhiConfiguration>
+  <importedStreams>
+    <stream as="inStream" name="GPS_JOSN_Input_Stream" version="1.0.0"/>
+  </importedStreams>
+  <queryExpressions><![CDATA[from inStream[speed >= 2]#window.geo:kalmanFilter(lat,5) 
+select lat,lon,speed,pdop,hdop,vdop,avg(speed) as processed_output
+insert into outStream for current-events]]></queryExpressions>
+  <exportedStreams>
+    <stream name="outStreamWindow" valueOf="outStream" version="1.0.0"/>
+  </exportedStreams>
+</executionPlan>
