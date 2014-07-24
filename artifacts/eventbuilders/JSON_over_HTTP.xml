@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eventBuilder name="JSON_over_HTTP" statistics="enable" trace="enable" xmlns="http://wso2.org/carbon/eventbuilder">
+    <from eventAdaptorName="http_test_input" eventAdaptorType="http">
+        <property name="topic">gps</property>
+    </from>
+    <mapping customMapping="enable" type="json">
+        <property>
+            <from jsonPath="lat"/>
+            <to name="lat" type="double"/>
+        </property>
+        <property>
+            <from jsonPath="lon"/>
+            <to name="lon" type="double"/>
+        </property>
+        <property>
+            <from jsonPath="speed"/>
+            <to name="speed" type="double"/>
+        </property>
+        <property>
+            <from jsonPath="pdop"/>
+            <to name="pdop" type="double"/>
+        </property>
+        <property>
+            <from jsonPath="hdop"/>
+            <to name="hdop" type="double"/>
+        </property>
+        <property>
+            <from jsonPath="vdop"/>
+            <to name="vdop" type="double"/>
+        </property>
+    </mapping>
+    <to streamName="GPS_JOSN_Input_Stream" version="1.0.0"/>
+</eventBuilder>
