@@ -1,5 +1,6 @@
 package org.geo.cep.extension;
 
+import org.apache.commons.math3.filter.KalmanFilter;
 import org.wso2.siddhi.core.config.SiddhiContext;
 import org.wso2.siddhi.core.event.StreamEvent;
 import org.wso2.siddhi.core.event.in.InEvent;
@@ -11,6 +12,8 @@ import org.wso2.siddhi.query.api.expression.Expression;
 import org.wso2.siddhi.query.api.expression.Variable;
 import org.wso2.siddhi.query.api.expression.constant.IntConstant;
 import org.wso2.siddhi.query.api.extension.annotation.SiddhiExtension;
+
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -85,8 +88,8 @@ public class CustomWindowExtension extends WindowProcessor {
                         QueryPostProcessingElement queryPostProcessingElement,
                         AbstractDefinition abstractDefinition, String s, boolean b,
                         SiddhiContext siddhiContext) {
-        if (expressions.length != 2) {
-            log.error("Parameters count is not matching, There should be two parameters ");
+        if (expressions.length != 1) {
+//            log.in("Parameters count is not matching, There should be two parameters ");
         }
         controlInput = ((Variable) expressions[0]).getAttributeName();
 //        noValue = ((IntConstant) expressions[1]).getValue();
@@ -94,25 +97,62 @@ public class CustomWindowExtension extends WindowProcessor {
         variablePosition = abstractDefinition.getAttributePosition(controlInput);
     }
     private void doProcessing(InEvent event) {
-        String data = (String) event.getData(variablePosition);
-        System.out.println("DEBUG:****ControlInput_data = "+data);
-        Double latitude = (Double) event.getData0();
-        Double longitude = (Double) event.getData1();
-        System.out.println("DEBUG:****Latitude = "+latitude+ "Longitude = "+longitude+"\n\nevent.getStreamId() = "+event.getStreamId());
-        for (int i = 0; i < 6; i++) {
-            data = String.valueOf(event.getData(i));
-            System.out.println("DEBUG: Data attribute number ("+i+") Data value = "+data);
-        }
-        Object[] new_data = new Object[]{
-                new Double((Double) event.getData0()+ 100.00),
+        System.out.println("###0### ");
+//        String data = (String) event.getData(variablePosition);
+//        System.out.println("DEBUG:****ControlInput_data = "+data);
+
+        HashMap<String,Double> processDataHashMap = new HashMap<String, Double>();
+        /**
+         * lat
+         * lon
+         * speed
+         * hdop
+         * vdop
+         * control input
+         * course
+         */
+
+        processDataHashMap.put("lat", new Double((Double)event.getData0()));
+        processDataHashMap.put("lon", new Double((Double)event.getData1()));
+        processDataHashMap.put("velocity",new Double((Double) event.getData2()));
+        processDataHashMap.put("hdop",new Double((Double)event.getData3()));
+        processDataHashMap.put("vdop",new Double((Double)event.getData4()));
+        //processDataHashMap.put("ctrlIp",new Double((Double)event.getData5()));
+        processDataHashMap.put("course", new Double((Double)event.getData6()));
+
+        System.out.println("#####: came"+processDataHashMap);
+
+      // double[] processedLatLon = doKalmanProcess(processDataHashMap);
+
+//        for (int i = 0; i < 6; i++) {
+//            data = String.valueOf(event.getData(i));
+//            System.out.println("#####: Data attribute number ("+i+") Data value = "+data);
+//        }
+
+        System.out.println("#### "+processDataHashMap.get("lat"));
+        System.out.println("#### "+processDataHashMap.get("lon"));
+        System.out.println("#### "+processDataHashMap.get("velocity"));
+        System.out.println("#### "+processDataHashMap.get("hdop"));
+        System.out.println("#### "+processDataHashMap.get("vdop"));
+        //System.out.println("#### "+processDataHashMap.get("ctrlIp"));
+        System.out.println("#### "+processDataHashMap.get("course"));
+
+        double[] processedData = doKalmanProcess(processDataHashMap);
+        System.out.println("#### Processed "+processedData[0]+" , "+processedData[1]);
+
+
+        Object[] sendData = new Object[]{
+                processedData[0],
                 new Double(123.456),
                 new Double(123.456),
                 new Double(123.456),
-                new Double((Double) event.getData1()+ 200.00),
+                processedData[1],
                 new String("ControlInputPass"),
                 new Double(654.321),
         };
-        InEvent newIn = new InEvent(event.getStreamId(),System.currentTimeMillis(),new_data);
+
+        InEvent newIn = new InEvent(event.getStreamId(),System.currentTimeMillis(),sendData);
+
         nextProcessor.process(newIn);
 //        log.info(event);
 //        Object eventKey = event.getData(variablePosition);
@@ -133,6 +173,38 @@ public class CustomWindowExtension extends WindowProcessor {
 //            }
 //        }
     }
+
+    private static boolean kalmanInitialized = false;
+
+    public static double[] doKalmanProcess(HashMap<String,Double> hm){
+
+        System.out.println("#### doKalmanProcess");
+
+        double lat =  (Double)hm.get("lat");
+        double lon = (Double)hm.get("lon");
+        double course = (Double)hm.get("course");
+        double velocity = (Double)hm.get("velocity");
+        double Vx = (Double)hm.get("vdop");
+        double Vy = (Double)hm.get("hdop");
+        System.out.println("#### doKalmanProcess Vy");
+
+        KalmanFIlter.setgpshm(lat, lon, course, velocity, Vx, Vy);
+        System.out.println("#### doKalmanProcess setgpshm");
+
+        if(kalmanInitialized == false){
+            System.out.println("kalmanInitialized "+kalmanInitialized);
+            KalmanFIlter.doKalman(lat, lon, course, velocity);
+            kalmanInitialized = true;
+        }
+
+        KalmanFIlter.doCorrect();
+        System.out.println("#### doCorrect");
+        double[] tempArray = KalmanFIlter.getEstimation();
+
+        return tempArray;
+    }
+
+
     @Override
     public void destroy() {
     }
