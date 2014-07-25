@@ -99,13 +99,17 @@ public class CustomWindowExtension extends WindowProcessor {
         Double latitude = (Double) event.getData0();
         Double longitude = (Double) event.getData1();
         System.out.println("DEBUG:****Latitude = "+latitude+ "Longitude = "+longitude+"\n\nevent.getStreamId() = "+event.getStreamId());
+        for (int i = 0; i < 6; i++) {
+            data = String.valueOf(event.getData(i));
+            System.out.println("DEBUG: Data attribute number ("+i+") Data value = "+data);
+        }
         Object[] new_data = new Object[]{
+                new Double((Double) event.getData0()+ 100.00),
                 new Double(123.456),
-                new Double(654.321),
-                new Double(654.321),
-                new Double(654.321),
-                new Double(654.321),
-                new String("Ohhhh"),
+                new Double(123.456),
+                new Double(123.456),
+                new Double((Double) event.getData1()+ 200.00),
+                new String("ControlInputPass"),
                 new Double(654.321),
         };
         InEvent newIn = new InEvent(event.getStreamId(),System.currentTimeMillis(),new_data);
