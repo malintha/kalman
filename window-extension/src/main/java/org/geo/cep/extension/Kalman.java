@@ -36,9 +36,13 @@ public class Kalman {
     private ProcessModel pm;
     private MeasurementModel mm;
     private KalmanFilter filter;
+    private MatrixSetter ms;
 
     public Kalman(){
+        ms = new MatrixSetter();
+        ms.initialize();
         System.out.println("###initialized###");
+        ms.printmatrices();
     }
     /**
      * Following is a sequence of methods to convert between geodetic and cartesian coordinates.
@@ -117,6 +121,7 @@ public class Kalman {
      * initialize matrices.
      */
     public void initializeMatrices(double lat, double lon, double course, double velocity){
+
         //set in config
         double dt = 10d;
 
@@ -207,7 +212,7 @@ public class Kalman {
 
     public void doKalmanCorrect(){
         filter.predict();
-        System.out.println("###predictedState"+filter.getStateEstimationVector());
+        System.out.println("###predictedState" + filter.getStateEstimationVector());
         double[] m_noise_array = {(Double) gpshm.get("Vx"),(Double) gpshm.get("Vy")};
         m_noise.setEntry(0, m_noise_array[0]);
         m_noise.setEntry(1, Math.pow(m_noise_array[0], 0.5));
