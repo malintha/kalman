@@ -5,7 +5,6 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-
 import java.io.*;
 
 /**
@@ -24,7 +23,6 @@ import java.io.*;
 public class MatrixSetter {
     private int Matcounter = 0;
     private int Linecounter = 0;
-
     private RealVector x;
     private RealMatrix B;
     private RealMatrix Q;
@@ -37,35 +35,11 @@ public class MatrixSetter {
     public MatrixSetter() {
 
     }
-//
-//    public static void main(String[] args) {
-//        MatrixSetter ms = new MatrixSetter();
-//        ms.readFile();
-//        System.out.println("dt : " + ms.getdt());
-//        System.out.println("x : "+ms.getX());
-//        System.out.println("A : "+ms.getA().toString());
-//        System.out.println("B : "+ms.getB());
-//        System.out.println("Q : "+ms.getQ());
-//        System.out.println("R : "+ms.getR());
-//        System.out.println("H : "+ms.getH());
-//        System.out.println("P0 : "+ms.getP0());
-//    }
+
     /**
      * first call this method
      */
-    public void printmatrices(){
-        MatrixSetter ms = new MatrixSetter();
-        System.out.println("dt : " + ms.getdt());
-        System.out.println("x : "+ms.getX());
-        System.out.println("A : "+ms.getA().toString());
-        System.out.println("B : "+ms.getB());
-        System.out.println("Q : "+ms.getQ());
-        System.out.println("R : "+ms.getR());
-        System.out.println("H : "+ms.getH());
-        System.out.println("P0 : "+ms.getP0());
-    }
-
-    public void initialize(){
+    public void readFile(){
         try {
             InputStream is = MatrixSetter.class.getResourceAsStream("kalmanConfig.csv");
             BufferedReader fbr = new BufferedReader(new InputStreamReader(is));
@@ -79,13 +53,11 @@ public class MatrixSetter {
                     Linecounter = 0;
                     //System.out.println();
                 }
-
                 else{
                     initializeMatrices((Matcounter+1), Linecounter, line);
                 }
                 line = fbr.readLine();
             }
-
         } catch (FileNotFoundException e) {
             System.out.println("###"+e.getLocalizedMessage());
         } catch (IOException e) {
@@ -94,33 +66,28 @@ public class MatrixSetter {
     }
 
     private void initializeMatrices(int matrixNumber, int rowNum, String line){
-        if(line.equals("null")){
-            //System.out.println("initialized with null");
-            //get matrix number and initialize with null
-        }
-        else {
             double[] t = parseLine(line);
             doInitializeMatrices(matrixNumber, rowNum, t);
-        }
     }
 
     public void doInitializeMatrices(int matrixNumber, int rowNum, double[] t) {
 //		got the double array and put it in the matrix
-
         switch (matrixNumber) {
+
             case 1:
                 //dt
                 if(rowNum == 2)
                 dt = t[0];
                 break;
+
             case 2:
                 //get the length of x vector
                 if(rowNum==1){
                     Number size = t[0];
                     x = new ArrayRealVector(size.intValue());
                 }
-
                 break;
+
             case 3:
                 //A t.length^2
                 if(rowNum==1){
@@ -132,6 +99,7 @@ public class MatrixSetter {
                     A.setRow(rowNum-2, t);
                 }
                 break;
+
             case 4:
                 //B
                 if(rowNum==1 && t[0]==0 && t[0]==0){
@@ -147,6 +115,7 @@ public class MatrixSetter {
                     B.setRow(rowNum-2,t);
                 }
                 break;
+
             case 5:
                 //Q
                 if(rowNum==1 && t[0]==0 && t[0]==0){
@@ -178,6 +147,7 @@ public class MatrixSetter {
                     R.setRow(rowNum - 2, t);
                 }
                 break;
+
             case 7:
                 //H
                 if(rowNum==1 && t[0]==0 && t[0]==0){
@@ -193,6 +163,7 @@ public class MatrixSetter {
                     H.setRow(rowNum - 2, t);
                 }
                 break;
+
             case 8:
                 //P0
                 if(rowNum==1 && t[0]==0 && t[0]==0){
@@ -208,6 +179,7 @@ public class MatrixSetter {
                     P0.setRow(rowNum - 2, t);
                 }
                 break;
+
             default :
                 //no other cases
                 break;

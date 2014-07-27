@@ -40,9 +40,11 @@ public class Kalman {
 
     public Kalman(){
         ms = new MatrixSetter();
-        ms.initialize();
-        System.out.println("###initialized###");
-        ms.printmatrices();
+        ms.readFile();
+        System.out.println("###initialized###\n"+ms.getdt()+"\n"+ms.getX()+"\n"+
+         ms.getA()+"\n"+ ms.getB()+"\n"+ms.getQ()+"\n"+ms.getR()+"\n"+ms.getH()+"\n"+
+         ms.getP0());
+
     }
     /**
      * Following is a sequence of methods to convert between geodetic and cartesian coordinates.
@@ -81,7 +83,6 @@ public class Kalman {
     }
 
     private double latFromXYZ(final double X, final double Y, final double Z, final double a, final double b) {
-
         final double RootXYSqr = Math.sqrt(Float11.pow(X, 2) + Float11.pow(Y, 2));
         final double e2 = (Float11.pow(a, 2) - Float11.pow(b, 2)) / Float11.pow(a, 2);
         final double PHI1 = Float11.atan2(Z, (RootXYSqr * (1 - e2)));
@@ -121,53 +122,19 @@ public class Kalman {
      * initialize matrices.
      */
     public void initializeMatrices(double lat, double lon, double course, double velocity){
-
-        //set in config
-        double dt = 10d;
-
-        //set in config
-        A = new Array2DRowRealMatrix(new double[][] { 	{ 1d, dt, 0d, 0d },
-                                                        { 0d, 1d, 0d, 0d },
-                                                        { 0d, 0d, 1d, dt },
-                                                        { 0d, 0d, 0d, 1d }
-                                                });
-
-        B = null;
-
-        //set in config
-        Q = new Array2DRowRealMatrix(new double[][]{	{ 1d, 0d, 0d, 0d },
-                                                        { 0d, 1d, 0d, 0d },
-                                                        { 0d, 0d, 1d, 0d },
-                                                        { 0d, 0d, 0d, 1d }
-                                                });
-//	set in config
-        R = new Array2DRowRealMatrix(new double[][] { 	{ 3d, 0d, 0d, 0d },
-                                                        { 0d, 1d, 0d, 0d },
-                                                        { 0d, 0d, 3d, 0d },
-                                                        { 0d, 0d, 0d, 1d }
-                                                });
-//	set in config
-        H = new Array2DRowRealMatrix(new double[][] { 	{ 1d, 0d, 0d, 0d },
-                                                        { 0d, 1d, 0d, 0d },
-                                                        { 0d, 0d, 1d, 0d },
-                                                        { 0d, 0d, 0d, 1d }
-                                                });
-//	set in config
-        P0 = new Array2DRowRealMatrix(new double[][] {  { 1d, 0d, 0d, 0d },
-                                                        { 0d, 1d, 0d, 0d },
-                                                        { 0d, 0d, 1d, 0d },
-                                                        { 0d, 0d, 0d, 1d }
-                                                });
-
-//	set in config
-        m_noise = new ArrayRealVector(4);
-
+        double dt = ms.getdt();
+        A = ms.getA();
+        B = ms.getB();
+        Q = ms.getQ();
+        R = ms.getR();
+        H = ms.getH();
+        P0 = ms.getP0();
+        x = ms.getX();
+        m_noise = new ArrayRealVector(x.getDimension());
         pm = new DefaultProcessModel(A, B, Q, x, P0);
         mm = new DefaultMeasurementModel(H, R);
         filter = new KalmanFilter(pm, mm);
-//        Set initial state
         setInitState(lat, lon, course, velocity);
-
     }
 
     /**
@@ -183,8 +150,10 @@ public class Kalman {
         double initX = xFromLonLatH(lat, lon, height, a, b);
         double initY = yFromLonLatH(lat, lon, height, a, b);
         double[] initVelocity = dXY(course, velocity);
-
-        x = new ArrayRealVector(new double[] { initX, initVelocity[0], initY, initVelocity[1] });
+        x.setEntry(0,initX);
+        x.setEntry(1,initVelocity[0]);
+        x.setEntry(2,initY);
+        x.setEntry(3,initVelocity[1]);
         System.out.println("###setInitState###" + x);
     }
 
@@ -195,10 +164,8 @@ public class Kalman {
         rX = this.xFromLonLatH(lat, lon, height, a, b);
         rY = this.yFromLonLatH(lat, lon, height, a, b);
         rZ = this.zFromLatH(lat, lon, a, b);
-
         System.out.print("\n#####setgpshm"+rX+","+rY+","+rZ);
         dxy = this.dXY(course, velocity);
-
         gpshm.put("rX", rX);
         gpshm.put("rY", rY);
         gpshm.put("rZ", rZ);
@@ -206,7 +173,6 @@ public class Kalman {
         gpshm.put("dY", dxy[1]);
         gpshm.put("Vx", Vx);
         gpshm.put("Vy", Vy);
-
         System.out.print("\n#####addCurrentMeasurement");
     }
 
@@ -225,7 +191,6 @@ public class Kalman {
         z.setEntry(1, (Double) gpshm.get("dX"));
         z.setEntry(2, (Double) gpshm.get("rY"));
         z.setEntry(3, (Double) gpshm.get("dY"));
-        //System.out.println("z : "+z);
         z = z.add(m_noise);
         //now correct
         filter.correct(z);
@@ -242,6 +207,4 @@ public class Kalman {
         double lon = lonFromXYZ(tempRx, tempRy);
         return new double[] {lat, lon};
     }
-
-
 }

@@ -101,7 +101,6 @@ public class CustomWindowExtension extends WindowProcessor {
 
     private void doProcessing(InEvent event) {
         System.out.println("###Event "+event.toString());
-        HashMap<String,Double> processDataHashMap = new HashMap<String, Double>();
 
         /**
          * lat
@@ -113,61 +112,38 @@ public class CustomWindowExtension extends WindowProcessor {
          * course
          */
 
-        System.out.println("####0 "+event.getData0());
-        System.out.println("####1 "+event.getData1());
-        System.out.println("####2 "+event.getData2());
-        System.out.println("####3 "+event.getData3());
-        System.out.println("####4 "+event.getData4());
-        System.out.println("####5 "+event.getData5());
-        System.out.println("####6 "+event.getData6());
-
-
-        processDataHashMap.put("lat", new Double((Double)event.getData0()));
-        processDataHashMap.put("lon", new Double((Double)event.getData1()));
-        processDataHashMap.put("velocity",new Double((Double) event.getData2()));
-        processDataHashMap.put("hdop",new Double((Double)event.getData3()));
-        processDataHashMap.put("vdop",new Double((Double)event.getData4()));
-        //processDataHashMap.put("ctrlIp",new Double((Double)event.getData5()));
-        processDataHashMap.put("course", new Double((Double)event.getData6()));
-
         /**
          * first initialize matrices. Then set the initial state.
-         * Finally call kalmanProcess method and get double array or Estimation vector
+         * Finally call doKalmanCorrect method and get double array or Estimation vector
          */
-        double lat =  (Double)processDataHashMap.get("lat");
-        double lon = (Double)processDataHashMap.get("lon");
-        double course = (Double)processDataHashMap.get("course");
-        double velocity = (Double)processDataHashMap.get("velocity");
-        double Vx = (Double)processDataHashMap.get("vdop");
-        double Vy = (Double)processDataHashMap.get("hdop");
+        double lat =  new Double((Double)event.getData0());
+        double lon = new Double((Double)event.getData1());
+        double velocity = new Double((Double) event.getData2());
+        double Vy = new Double((Double)event.getData3());
+        double Vx = new Double((Double)event.getData4());
+        //double ctrlIp = Double.parseDouble((String)event.getData5());
+        double course = new Double((Double)event.getData6());
 
         k.addCurrentMeasurement(lat, lon, course, velocity,Vx, Vy);
-
         System.out.println("###isKalmanInitialized "+isKalmanInitialized);
-
         if(!isKalmanInitialized) {
             k.initializeMatrices(lat, lon, course, velocity);
             isKalmanInitialized=true;
             System.out.println("###isKalmanInitialized "+isKalmanInitialized);
         }
-
         k.doKalmanCorrect();
-
         double[] processedData =  k.getEstimation();
         System.out.println("###processedData "+processedData[0]+","+processedData[1]);
-
         Object[] sendData = new Object[]{
                 processedData[0],
                 new Double(123.456),
                 new Double(123.456),
                 new Double(123.456),
                 processedData[1],
-                new String("ControlInputPass"),
+                new String("0"),
                 new Double(654.321)
         };
-
         InEvent newIn = new InEvent(event.getStreamId(),System.currentTimeMillis(),sendData);
-
         nextProcessor.process(newIn);
     }
 
