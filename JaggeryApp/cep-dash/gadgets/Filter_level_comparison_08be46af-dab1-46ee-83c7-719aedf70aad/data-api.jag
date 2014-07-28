@@ -1,0 +1,20 @@
+<%
+function getChartData() {
+   var connectionData = JSON.parse('{"Connection" : "testdb_MYSQL_DB", "undefined" : ""}');
+   var queryData = JSON.parse('{"SQL Statement" : "select * from gps_data order by lat"}');
+   var dataColumns = JSON.parse('["X-Axis", "Y-Axis"]');
+   var mapping = JSON.parse('[{"Series Label" : "Testing", "X-Axis" : "lat", "Y-Axis" : "lon"}]');
+   var timeSeries = JSON.parse('false');
+   var dataLabels = JSON.parse('{"X-Axis Label" : "Latitude", "Y-Axis Label" : "Longitude"}');
+   
+   var dbHandler = require('/gadgets/Filter_level_comparison_08be46af-dab1-46ee-83c7-719aedf70aad/modules/db-handlers/rdbms-handler.js');
+   var dbResult = dbHandler.getData(connectionData,queryData);
+   
+   var dataProcessor = require('/gadgets/Filter_level_comparison_08be46af-dab1-46ee-83c7-719aedf70aad/modules/flot-charts/default-chart.js'); 
+   var processedData = dataProcessor.processData(dbResult,mapping,dataColumns,dataLabels,timeSeries); 
+   
+ return processedData;
+}
+  
+print(getChartData());
+%>

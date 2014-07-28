@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/background.css" rel="stylesheet" type="text/css"/>
+    <!--Load the AJAX API-->
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        /*---- Google Charts Initialization ----*/
+        // Load the Visualization API and the piechart package.
+        google.load('visualization', '1.0', {'packages': ['corechart']});
+
+        // Set a callback to run when the Google Visualization API is loaded.
+        google.setOnLoadCallback(drawChart);
+        var data;
+        var options;
+        var chart;
+        /*--------*/
+
+        $(document).ready(function () {
+            $.get("getData.jag", {action: "init"}, function (return_data) {
+                $.each($.parseJSON(return_data), processData)
+            });
+            setInterval(ajaxGet,5000);
+        });
+        function drawChart() {
+            // Create the data table.
+            data = new google.visualization.DataTable();
+            data.addColumn({type: 'number', role: 'domain'});
+            data.addColumn('number', 'Filtered');
+            data.addColumn({type: 'number', role: 'domain'});
+            data.addColumn('number', 'None-Filtered');
+            options = {
+                'title': 'Kalman Filter Sample',
+                hAxis: {title: 'Latitude', titleTextStyle: {color: '#333'}},
+                vAxis: {title: 'Longitude'},
+                isStacked: true,
+                animation: {
+                    duration: 1000,
+                    easing: 'in'
+                }
+            };
+
+            chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
+
+        function ajaxGet(){
+            $.get("getData.jag", {action: "continues"}, function (return_data) {
+                $.each($.parseJSON(return_data), processData)
+            });
+        }
+        function processData(index, value) {
+            filtered_lat = filtered_lon = null;
+            data.addRow([parseFloat(value.lat),parseFloat(value.lon),filtered_lat,filtered_lon]);
+            chart.draw(data,options);
+        }
+
+    </script>
+</head>
+
+<body>
+<div class="container">
+    <div class="row">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 well" style="text-align: center;">
+                Kalman filter sample display
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-lg-12 fixer" style="width: 100%;">
+                <div class="effect8" style="height: 550px;border:1px solid black;margin: 0;border: none"
+                     id="chart_div"></div>
+            </div>
+        </div>
+    </div>
+    <!--Div that will hold the pie chart-->
+
+</div>
+</body>
+
+</html>
+
+

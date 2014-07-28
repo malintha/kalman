@@ -1,0 +1,36 @@
+<%
+
+if(request.getParameter("action") == "continues"){
+
+	var db = new Database("jdbc:mysql://localhost:3306/testdb", "root", "kasun123");
+
+    try{
+        var result = db.query("select * from gps_data LIMIT 1;");
+        print(result);
+
+    } catch(e){
+        print(e.toString());
+
+    } finally{
+
+        db.close();
+    }
+}
+
+if(request.getParameter("action") == "init"){
+
+	var db = new Database("jdbc:mysql://localhost:3306/testdb", "root", "kasun123");
+
+    try{
+        var result = db.query("select * from gps_data LIMIT 6;");
+        print(result);
+
+    } catch(e){
+        print(e.toString());
+
+    } finally{
+
+        db.close();
+    }
+}
+%>
