@@ -1,0 +1,19 @@
+<%
+if(request.getParameter("action") == "search"){
+	//print("helloo");
+ 	var lat = request.getParameter("lat");
+ 	var lon = request.getParameter("lon");
+ 	var url  = "http://api.openweathermap.org/data/2.5/weather?lat="+lat+"&lon="+lon;
+ 	var responseJson = get(url);
+
+ 	var a = JSON.parse(responseJson.data);
+	//print(result.wind.speed);
+	print ("<li>Location : "+a.name+","+a.sys.country+
+	"<br>General : "+a.weather[0].main+" | Description : "+a.weather[0].description+" | Clouds : "+a.clouds.all+
+	"<br>Sunrise : "+a.sys.sunrise+" | Sunset : "+a.sys.sunset+
+	"<br>Wind Speed(km/h) : "+a.wind.speed+" |  Direction : "+a.wind.deg+
+	"<br>Avg. Temperature(K) : "+a.main.temp+" |  Min(K) : "+a.main.temp_min+" |  Max(K) : "+a.main.temp_max+
+	"</li>");
+}
+
+%>
