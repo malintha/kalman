@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<outputEventAdaptor name="kalman_db_output_adaptor" statistics="enable"
+  trace="enable" type="mysql" xmlns="http://wso2.org/carbon/eventadaptormanager">
+  <property name="datasource.name">kalman_db</property>
+</outputEventAdaptor>
