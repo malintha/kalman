@@ -19,26 +19,42 @@
         var data;
         var options;
         var chart;
+        var refreshIntervalId;
         /*--------*/
 
         $(document).ready(function () {
             $.get("getData.jag", {action: "coordinates"}, function (return_data) {
                 $.each($.parseJSON(return_data), processData)
             });
-            setInterval(ajaxGet,1500);
+            startAjax();
+
         });
+        function startAjax(){
+            refreshIntervalId =  setInterval(ajaxGet,1500);
+        }
+
+        function reset(){
+            $.get("clearData.jag", {action: "clear"}, function (return_data) {
+                drawChart();
+                alert("Data table Cleared");
+            });
+        }
+
         function drawChart() {
             // Create the data table.
             data = new google.visualization.DataTable();
             data.addColumn({type: 'number', role: 'domain'});
             data.addColumn('number', 'Filtered');
+            data.addColumn({type: 'string', role: 'annotation'});
             data.addColumn({type: 'number', role: 'domain'});
             data.addColumn('number', 'None-Filtered');
+            data.addColumn({type: 'string', role: 'annotation'});
             options = {
                 'title': 'Kalman Filter Sample',
                 hAxis: {title: 'Latitude', titleTextStyle: {color: '#333'}},
                 vAxis: {title: 'Longitude'},
                 isStacked: true,
+                chartArea: {width: '75%', height: '85%'},
                 animation: {
                     duration: 1000,
                     easing: 'in'
@@ -55,7 +71,7 @@
             });
         }
         function processData(index, value) {
-            data.addRow([parseFloat(value.filtered_Lat),parseFloat(value.filtered_Lon),parseFloat(value.unfiltered_Lat),parseFloat(value.unfiltered_Lon)]);
+            data.addRow([parseFloat(value.filtered_Lat),parseFloat(value.filtered_Lon),"Filtered",parseFloat(value.unfiltered_Lat),parseFloat(value.unfiltered_Lon),"UnFiltered"]);
             chart.draw(data,options);
         }
 
@@ -66,7 +82,17 @@
 <div class="container">
     <div class="row">
         <div class="row">
-            <div class="col-md-6 col-md-offset-3 well" style="text-align: center;">
+            <button id="ajaxControler" class="btn btn-info" onclick="startAjax()">
+                Start Animation
+            </button>
+            <button id="ajaxControler" class="btn btn-sm btn-warning" onclick="clearInterval(refreshIntervalId)">
+                Pause Animation
+            </button>
+            <button id="ajaxControler" class="btn btn-sm btn-danger" onclick="reset()">
+                Reset
+            </button>
+
+            <div class="col-md-5 col-md-offset-3 well" style="text-align: center;">
                 Kalman filter sample display
             </div>
 
