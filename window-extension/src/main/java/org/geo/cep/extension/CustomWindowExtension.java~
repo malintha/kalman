@@ -139,7 +139,6 @@ public class CustomWindowExtension extends WindowProcessor {
         double Vx = new Double((Double) event.getData4());
         double course = new Double((Double) event.getData5());
         double ctrlIp = new Double((Double) event.getData6());
-        int eventId = new Integer((Integer) event.getData7());
 
         System.out.println("lat = "+lat+"lon = "+lon+" course = "+course+" velo = "+velocity+" Vx = "+Vx+" Vy = "+Vy);
         k.addCurrentMeasurement(lat, lon, course, velocity, Vx, Vy);
@@ -159,8 +158,7 @@ public class CustomWindowExtension extends WindowProcessor {
                 Vy,
                 Vx,
                 course,
-                ctrlIp,
-                eventId
+                ctrlIp
         };
         InEvent newIn = new InEvent(event.getStreamId(), System.currentTimeMillis(), sendData);
         nextProcessor.process(newIn);

@@ -6,12 +6,15 @@
     <property name="siddhi.enable.distributed.processing">false</property>
   </siddhiConfiguration>
   <importedStreams>
-    <stream as="inStream" name="GPS_JOSN_Input_Stream" version="1.0.0"/>
+    <stream as="inStream" name="InputDataStream" version="1.0.0"/>
   </importedStreams>
-  <queryExpressions><![CDATA[from inStream[speed >= 2]#window.geo:kalmanFilter(lat,5) 
-select lat,lon,speed,pdop,hdop,vdop,avg(speed) as processed_output
-insert into outStream for current-events]]></queryExpressions>
+  <queryExpressions><![CDATA[from inStream#window.geo:kalmanFilter(controlInput) 
+  insert into tempLog;
+  from tempLog#window.length(5) as filteredData join 
+  inStream#window.length(5) as unFilteredData on filteredData.eventId == unFilteredData.eventId 
+  select unFilteredData.lat,unFilteredData.lon,filteredData.eventId,filteredData.lat as f_lat,filteredData.lon as f_lon
+insert into outStream]]></queryExpressions>
   <exportedStreams>
-    <stream name="outStreamWindow" valueOf="outStream" version="1.0.0"/>
+    <stream name="OutDataStream" valueOf="outStream" version="1.0.0"/>
   </exportedStreams>
 </executionPlan>

@@ -17,10 +17,6 @@
             <to name="speed" type="double"/>
         </property>
         <property>
-            <from jsonPath="pdop"/>
-            <to name="pdop" type="double"/>
-        </property>
-        <property>
             <from jsonPath="hdop"/>
             <to name="hdop" type="double"/>
         </property>
@@ -28,6 +24,18 @@
             <from jsonPath="vdop"/>
             <to name="vdop" type="double"/>
         </property>
+        <property>
+            <from jsonPath="course"/>
+            <to name="course" type="double"/>
+        </property>
+        <property>
+            <from jsonPath="controlInput"/>
+            <to name="controlInput" type="double"/>
+        </property>
+        <property>
+            <from jsonPath="eventId"/>
+            <to name="eventId" type="int"/>
+        </property>
     </mapping>
-    <to streamName="GPS_JOSN_Input_Stream" version="1.0.0"/>
+    <to streamName="InputDataStream" version="1.0.0"/>
 </eventBuilder>

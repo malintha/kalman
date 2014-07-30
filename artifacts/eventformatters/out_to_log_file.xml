@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eventFormatter name="out_to_log_file" statistics="enable"
+  trace="enable" xmlns="http://wso2.org/carbon/eventformatter">
+  <from streamName="OutDataStream" version="1.0.0"/>
+  <mapping customMapping="enable" type="json">
+    <inline>{
+"Latitude": "{{lat}}",
+"Filtered Latitude": "{{f_lat}}",
+"Longitude": "{{lon}}",
+"Filtered longitude": "{{f_lon}}",
+"Event Id *********************": "{{eventId}}"
+}</inline>
+  </mapping>
+  <to eventAdaptorName="logger_output" eventAdaptorType="logger">
+    <property name="uniqueId">gps_kalman_filter_log</property>
+  </to>
+</eventFormatter>

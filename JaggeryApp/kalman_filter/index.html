@@ -22,10 +22,10 @@
         /*--------*/
 
         $(document).ready(function () {
-            $.get("getData.jag", {action: "init"}, function (return_data) {
+            $.get("getData.jag", {action: "coordinates"}, function (return_data) {
                 $.each($.parseJSON(return_data), processData)
             });
-            setInterval(ajaxGet,5000);
+            setInterval(ajaxGet,1500);
         });
         function drawChart() {
             // Create the data table.
@@ -50,13 +50,12 @@
         }
 
         function ajaxGet(){
-            $.get("getData.jag", {action: "continues"}, function (return_data) {
+            $.get("getData.jag", {action: "coordinates"}, function (return_data) {
                 $.each($.parseJSON(return_data), processData)
             });
         }
         function processData(index, value) {
-            filtered_lat = filtered_lon = null;
-            data.addRow([parseFloat(value.lat),parseFloat(value.lon),filtered_lat,filtered_lon]);
+            data.addRow([parseFloat(value.filtered_Lat),parseFloat(value.filtered_Lon),parseFloat(value.unfiltered_Lat),parseFloat(value.unfiltered_Lon)]);
             chart.draw(data,options);
         }
 
