@@ -6,28 +6,24 @@
     <script src="js/jquery-2.1.1.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <script src="js/c3.min.js"></script>
+    <script src="js/d3.min.js"></script>
+    <link href="css/c3.css" rel="stylesheet">
     <link href="css/background.css" rel="stylesheet" type="text/css"/>
     <!--Load the AJAX API-->
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
-        /*---- Google Charts Initialization ----*/
-        // Load the Visualization API and the piechart package.
-        google.load('visualization', '1.0', {'packages': ['corechart']});
-
-        // Set a callback to run when the Google Visualization API is loaded.
-        google.setOnLoadCallback(drawChart);
-        var data;
-        var options;
-        var chart;
-        var refreshIntervalId;
-        /*--------*/
 
         $(document).ready(function () {
-            $.get("getData.jag", {action: "coordinates"}, function (return_data) {
-                $.each($.parseJSON(return_data), processData)
+//            startAjax();
+            var chart = c3.generate({
+                bindto: '#chart_div',
+                data: {
+                    columns: [
+                        ['Filtered', 30, 200, 100, 400, 150, 250],
+                        ['Unfiltered', 50, 20, 10, 40, 15, 25]
+                    ]
+                }
             });
-            startAjax();
-
         });
         function startAjax(){
             refreshIntervalId =  setInterval(ajaxGet,1500);
@@ -41,28 +37,6 @@
         }
 
         function drawChart() {
-            // Create the data table.
-            data = new google.visualization.DataTable();
-            data.addColumn({type: 'number', role: 'domain'});
-            data.addColumn('number', 'Filtered');
-            data.addColumn({type: 'string', role: 'annotation'});
-            data.addColumn({type: 'number', role: 'domain'});
-            data.addColumn('number', 'None-Filtered');
-            data.addColumn({type: 'string', role: 'annotation'});
-            options = {
-                'title': 'Kalman Filter Sample',
-                hAxis: {title: 'Latitude', titleTextStyle: {color: '#333'}},
-                vAxis: {title: 'Longitude'},
-                isStacked: true,
-                chartArea: {width: '75%', height: '85%'},
-                animation: {
-                    duration: 1000,
-                    easing: 'in'
-                }
-            };
-
-            chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-            chart.draw(data, options);
         }
 
         function ajaxGet(){
@@ -71,9 +45,12 @@
             });
         }
         function processData(index, value) {
-            data.addRow([parseFloat(value.filtered_Lat),parseFloat(value.filtered_Lon),"Filtered",parseFloat(value.unfiltered_Lat),parseFloat(value.unfiltered_Lon),"UnFiltered"]);
-            chart.draw(data,options);
+//            data.addRow([parseFloat(value.filtered_Lat),parseFloat(value.filtered_Lon),"Filtered",parseFloat(value.unfiltered_Lat),parseFloat(value.unfiltered_Lon),"UnFiltered"]);
+
         }
+
+
+        var url = 'ws://localhost:9443/kalman_filter/websocket.jag';
 
     </script>
 </head>
@@ -99,7 +76,7 @@
         </div>
         <div class="row">
             <div class="col-lg-12 fixer" style="width: 100%;">
-                <div class="effect8" style="height: 550px;border:1px solid black;margin: 0;border: none"
+                <div class="effect8" style="height: 550px;border:1px solid black;margin: 0;border: none;background-color: aliceblue;"
                      id="chart_div"></div>
             </div>
         </div>

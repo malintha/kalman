@@ -1,4 +1,7 @@
 <%
+/*
+
+*/
 
 if(request.getParameter("action") == "coordinates"){
 
